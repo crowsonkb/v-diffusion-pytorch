@@ -10,7 +10,7 @@ Thank you to [stability.ai](https://www.stability.ai) for compute to train these
 
 - PyTorch ([installation instructions](https://pytorch.org/get-started/locally/))
 
-- tqdm (install with `pip install`)
+- requests, tqdm (install with `pip install`)
 
 - CLIP (https://github.com/openai/CLIP), and its additional pip-installable dependencies: ftfy, regex. **If you `git clone --recursive` this repo, it should fetch CLIP automatically.**
 
@@ -35,13 +35,14 @@ If they are somewhere else, you need to specify the path to the checkpoint with 
 ### CLIP conditioned/guided sampling
 
 ```
-usage: clip_sample.py [-h] [--batch-size BATCH_SIZE] [--checkpoint CHECKPOINT]
-                      [--clip-guidance-scale CLIP_GUIDANCE_SCALE] [--device DEVICE] [--eta ETA]
-                      [--model {cc12m_1}] [-n N] [--seed SEED] [--steps STEPS]
-                      prompt
+usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
+                      [--checkpoint CHECKPOINT] [--clip-guidance-scale CLIP_GUIDANCE_SCALE]
+                      [--device DEVICE] [--eta ETA] [--model {cc12m_1}] [-n N] [--seed SEED]
+                      [--steps STEPS]
+                      [prompts ...]
 ```
 
-`prompt`: the text prompt to use
+`prompts`: the text prompts to use. Relative weights for text prompts can be specified by putting the weight after a colon, for example: `"the rise of consciousness:0.5"`.
 
 `--batch-size`: sample this many images at a time (default 1)
 
@@ -52,6 +53,8 @@ usage: clip_sample.py [-h] [--batch-size BATCH_SIZE] [--checkpoint CHECKPOINT]
 `--device`: the PyTorch device name to use (default autodetects)
 
 `--eta`: set to 0 for deterministic (DDIM) sampling, 1 (the default) for stochastic (DDPM) sampling, and in between to interpolate between the two. DDIM is preferred for low numbers of timesteps.
+
+`--images`: the image prompts to use (local files or HTTP(S) URLs). Relative weights for image prompts can be specified by putting the weight after a colon, for example: `"image_1.png:0.5"`.
 
 `--model`: specify the model to use (default cc12m_1)
 

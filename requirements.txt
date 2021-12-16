@@ -1,0 +1,7 @@
+ftfy
+regex
+requests
+Pillow
+torch
+torchvision
+tqdm
