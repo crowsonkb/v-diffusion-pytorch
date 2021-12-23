@@ -47,7 +47,7 @@ usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                       [--checkpoint CHECKPOINT] [--clip-guidance-scale CLIP_GUIDANCE_SCALE]
                       [--cutn CUTN] [--cut-pow CUT_POW] [--device DEVICE] [--eta ETA]
                       [--init INIT] [--model {cc12m_1,yfcc_1,yfcc_2}] [-n N] [--seed SEED]
-                      [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
+                      [--size SIZE SIZE] [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
                       [prompts ...]
 ```
 
@@ -78,5 +78,7 @@ usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 `--seed`: specify the random seed (default 0)
 
 `--starting-timestep`: specify the starting timestep if an init image is used (range 0-1, default 0.9)
+
+`--size`: the output image size (default auto)
 
 `--steps`: specify the number of diffusion timesteps (default is 1000, can lower for faster but lower quality sampling)

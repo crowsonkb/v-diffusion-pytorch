@@ -61,7 +61,7 @@ def parse_prompt(prompt):
 def resize_and_center_crop(image, size):
     fac = max(size[0] / image.size[0], size[1] / image.size[1])
     image = image.resize((int(fac * image.size[0]), int(fac * image.size[1])), Image.LANCZOS)
-    return TF.center_crop(image, size)
+    return TF.center_crop(image, size[::-1])
 
 
 def main():
@@ -93,6 +93,8 @@ def main():
                    help='the number of images to sample')
     p.add_argument('--seed', type=int, default=0,
                    help='the random seed')
+    p.add_argument('--size', type=int, nargs=2,
+                   help='the output image size')
     p.add_argument('--starting-timestep', '-st', type=float, default=0.9,
                    help='the timestep to start at (used with init images)')
     p.add_argument('--steps', type=int, default=1000,
@@ -107,6 +109,8 @@ def main():
 
     model = get_model(args.model)()
     _, side_y, side_x = model.shape
+    if args.size:
+        side_x, side_y = args.size
     checkpoint = args.checkpoint
     if not checkpoint:
         checkpoint = MODULE_DIR / f'checkpoints/{args.model}.pth'
