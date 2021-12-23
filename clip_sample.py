@@ -58,6 +58,12 @@ def parse_prompt(prompt):
     return vals[0], float(vals[1])
 
 
+def resize_and_center_crop(image, size):
+    fac = max(size[0] / image.size[0], size[1] / image.size[1])
+    image = image.resize((int(fac * image.size[0]), int(fac * image.size[1])), Image.LANCZOS)
+    return TF.center_crop(image, size)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -79,12 +85,16 @@ def main():
                    help='the device to use')
     p.add_argument('--eta', type=float, default=1.,
                    help='the amount of noise to add during sampling (0-1)')
+    p.add_argument('--init', type=str,
+                   help='the init image')
     p.add_argument('--model', type=str, default='cc12m_1', choices=get_models(),
                    help='the model to use')
     p.add_argument('-n', type=int, default=1,
                    help='the number of images to sample')
     p.add_argument('--seed', type=int, default=0,
                    help='the random seed')
+    p.add_argument('--starting-timestep', '-st', type=float, default=0.9,
+                   help='the timestep to start at (used with init images)')
     p.add_argument('--steps', type=int, default=1000,
                    help='the number of timesteps')
     args = p.parse_args()
@@ -110,6 +120,11 @@ def main():
     normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
                                      std=[0.26862954, 0.26130258, 0.27577711])
     make_cutouts = MakeCutouts(clip_model.visual.input_resolution, args.cutn, args.cut_pow)
+
+    if args.init:
+        init = Image.open(utils.fetch(args.init)).convert('RGB')
+        init = resize_and_center_crop(init, (side_x, side_y))
+        init = utils.from_pil_image(init).cuda()[None].repeat([args.n, 1, 1, 1])
 
     target_embeds, weights = [], []
 
@@ -149,9 +164,7 @@ def main():
         grad = -torch.autograd.grad(loss, x)[0]
         return grad
 
-    def run(x, clip_embed):
-        t = torch.linspace(1, 0, args.steps + 1, device=device)[:-1]
-        steps = utils.get_spliced_ddpm_cosine_schedule(t)
+    def run(x, steps, clip_embed):
         if hasattr(model, 'clip_model'):
             extra_args = {'clip_embed': clip_embed}
             cond_fn_ = cond_fn
@@ -164,9 +177,15 @@ def main():
 
     def run_all(n, batch_size):
         x = torch.randn([args.n, 3, side_y, side_x], device=device)
+        t = torch.linspace(1, 0, args.steps + 1, device=device)[:-1]
+        steps = utils.get_spliced_ddpm_cosine_schedule(t)
+        if args.init:
+            steps = steps[steps < args.starting_timestep]
+            alpha, sigma = utils.t_to_alpha_sigma(steps[0])
+            x = init * alpha + x * sigma
         for i in trange(0, n, batch_size):
             cur_batch_size = min(n - i, batch_size)
-            outs = run(x[i:i+cur_batch_size], clip_embed[i:i+cur_batch_size])
+            outs = run(x[i:i+cur_batch_size], steps, clip_embed[i:i+cur_batch_size])
             for j, out in enumerate(outs):
                 utils.to_pil_image(out).save(f'out_{i + j:05}.png')
 

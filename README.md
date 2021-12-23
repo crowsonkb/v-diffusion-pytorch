@@ -46,7 +46,8 @@ If they are somewhere else, you need to specify the path to the checkpoint with 
 usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                       [--checkpoint CHECKPOINT] [--clip-guidance-scale CLIP_GUIDANCE_SCALE]
                       [--cutn CUTN] [--cut-pow CUT_POW] [--device DEVICE] [--eta ETA]
-                      [--model {cc12m_1,yfcc_1,yfcc_2}] [-n N] [--seed SEED] [--steps STEPS]
+                      [--init INIT] [--model {cc12m_1,yfcc_1,yfcc_2}] [-n N] [--seed SEED]
+                      [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
                       [prompts ...]
 ```
 
@@ -68,10 +69,14 @@ usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--images`: the image prompts to use (local files or HTTP(S) URLs). Relative weights for image prompts can be specified by putting the weight after a colon, for example: `"image_1.png:0.5"`.
 
+`--init`: specify the init image (optional)
+
 `--model`: specify the model to use (default cc12m_1)
 
 `-n`: sample until this many images are sampled (default 1)
 
 `--seed`: specify the random seed (default 0)
+
+`--starting-timestep`: specify the starting timestep if an init image is used (range 0-1, default 0.9)
 
 `--steps`: specify the number of diffusion timesteps (default is 1000, can lower for faster but lower quality sampling)
