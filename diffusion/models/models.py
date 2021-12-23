@@ -1,8 +1,10 @@
-from . import cc12m_1
+from . import cc12m_1, yfcc_1, yfcc_2
 
 
 models = {
     'cc12m_1': cc12m_1.CC12M1Model,
+    'yfcc_1': yfcc_1.YFCC1Model,
+    'yfcc_2': yfcc_2.YFCC2Model,
 }
 
 

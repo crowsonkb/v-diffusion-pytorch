@@ -3,6 +3,7 @@
 """CLIP guided sampling from a diffusion model."""
 
 import argparse
+from functools import partial
 from pathlib import Path
 
 from PIL import Image
@@ -70,6 +71,10 @@ def main():
                    help='the checkpoint to use')
     p.add_argument('--clip-guidance-scale', '-cs', type=float, default=500.,
                    help='the CLIP guidance scale')
+    p.add_argument('--cutn', type=int, default=16,
+                   help='the number of random crops to use')
+    p.add_argument('--cut-pow', type=float, default=1.,
+                   help='the random crop size power')
     p.add_argument('--device', type=str,
                    help='the device to use')
     p.add_argument('--eta', type=float, default=1.,
@@ -99,12 +104,12 @@ def main():
     if device.type == 'cuda':
         model = model.half()
     model = model.to(device).eval().requires_grad_(False)
-    clip_model = clip.load(model.clip_model, jit=False, device=device)[0]
+    clip_model_name = model.clip_model if hasattr(model, 'clip_model') else 'ViT-B/16'
+    clip_model = clip.load(clip_model_name, jit=False, device=device)[0]
     clip_model.eval().requires_grad_(False)
     normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
                                      std=[0.26862954, 0.26130258, 0.27577711])
-    cutn = 16
-    make_cutouts = MakeCutouts(clip_model.visual.input_resolution, cutn=cutn, cut_pow=1)
+    make_cutouts = MakeCutouts(clip_model.visual.input_resolution, args.cutn, args.cut_pow)
 
     target_embeds, weights = [], []
 
@@ -121,7 +126,7 @@ def main():
         batch = make_cutouts(TF.to_tensor(img)[None].to(device))
         embeds = F.normalize(clip_model.encode_image(normalize(batch)).float(), dim=-1)
         target_embeds.append(embeds)
-        weights.extend([weight / cutn] * cutn)
+        weights.extend([weight / args.cutn] * args.cutn)
 
     if not target_embeds:
         raise RuntimeError('At least one text or image prompt must be specified.')
@@ -136,9 +141,9 @@ def main():
 
     torch.manual_seed(args.seed)
 
-    def cond_fn(x, t, pred, clip_embed):
+    def cond_fn(x, t, pred, **kwargs):
         clip_in = normalize(make_cutouts((pred + 1) / 2))
-        image_embeds = clip_model.encode_image(clip_in).view([cutn, x.shape[0], -1])
+        image_embeds = clip_model.encode_image(clip_in).view([args.cutn, x.shape[0], -1])
         losses = spherical_dist_loss(image_embeds, clip_embed[None])
         loss = losses.mean(0).sum() * args.clip_guidance_scale
         grad = -torch.autograd.grad(loss, x)[0]
@@ -147,7 +152,7 @@ def main():
     def run(x, clip_embed):
         t = torch.linspace(1, 0, args.steps + 1, device=device)[:-1]
         steps = utils.get_spliced_ddpm_cosine_schedule(t)
-        extra_args = {'clip_embed': clip_embed}
+        extra_args = {'clip_embed': clip_embed} if hasattr(model, 'clip_model') else {}
         if not args.clip_guidance_scale:
             return sampling.sample(model, x, steps, args.eta, extra_args)
         return sampling.cond_sample(model, x, steps, args.eta, extra_args, cond_fn)

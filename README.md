@@ -16,9 +16,17 @@ Thank you to [stability.ai](https://www.stability.ai) for compute to train these
 
 ## Model checkpoints:
 
-- [CC12M 256x256](https://v-diffusion.s3.us-west-2.amazonaws.com/cc12m_1.pth), SHA-256 `63946d1f6a1cb54b823df818c305d90a9c26611e594b5f208795864d5efe0d1f`
+- [CC12M_1 256x256](https://v-diffusion.s3.us-west-2.amazonaws.com/cc12m_1.pth), SHA-256 `63946d1f6a1cb54b823df818c305d90a9c26611e594b5f208795864d5efe0d1f`
 
 A 602M parameter CLIP conditioned model trained on [Conceptual 12M](https://github.com/google-research-datasets/conceptual-12m) for 3.1M steps.
+
+- [YFCC_1 512x512](https://v-diffusion.s3.us-west-2.amazonaws.com/yfcc_1.pth), SHA-256 `a1c0f6baaf89cb4c461f691c2505e451ff1f9524744ce15332b7987cc6e3f0c8`
+
+A 481M parameter unconditional model trained on a 33 million image original resolution subset of [Yahoo Flickr Creative Commons 100 Million](http://projects.dfki.uni-kl.de/yfcc100m/).
+
+- [YFCC_2 512x512](https://v-diffusion.s3.us-west-2.amazonaws.com/yfcc_2.pth), SHA-256 `69ad4e534feaaebfd4ccefbf03853d5834231ae1b5402b9d2c3e2b331de27907`
+
+A 968M parameter unconditional model trained on a 33 million image original resolution subset of [Yahoo Flickr Creative Commons 100 Million](http://projects.dfki.uni-kl.de/yfcc100m/).
 
 ## Sampling
 
@@ -37,8 +45,8 @@ If they are somewhere else, you need to specify the path to the checkpoint with 
 ```
 usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                       [--checkpoint CHECKPOINT] [--clip-guidance-scale CLIP_GUIDANCE_SCALE]
-                      [--device DEVICE] [--eta ETA] [--model {cc12m_1}] [-n N] [--seed SEED]
-                      [--steps STEPS]
+                      [--cutn CUTN] [--cut-pow CUT_POW] [--device DEVICE] [--eta ETA]
+                      [--model {cc12m_1,yfcc_1,yfcc_2}] [-n N] [--seed SEED] [--steps STEPS]
                       [prompts ...]
 ```
 
@@ -49,6 +57,10 @@ usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 `--checkpoint`: manually specify the model checkpoint file
 
 `--clip-guidance-scale`: how strongly the result should match the text prompt (default 500). If set to 0, the cc12m_1 model will still be CLIP conditioned and sampling will go faster and use less memory.
+
+`--cutn`: the number of random crops to compute CLIP embeddings for (default 16)
+
+`--cut-pow`: the random crop size power (default 1)
 
 `--device`: the PyTorch device name to use (default autodetects)
 
