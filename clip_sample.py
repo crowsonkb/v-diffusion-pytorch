@@ -141,7 +141,7 @@ def main():
 
     torch.manual_seed(args.seed)
 
-    def cond_fn(x, t, pred, **kwargs):
+    def cond_fn(x, t, pred, clip_embed):
         clip_in = normalize(make_cutouts((pred + 1) / 2))
         image_embeds = clip_model.encode_image(clip_in).view([args.cutn, x.shape[0], -1])
         losses = spherical_dist_loss(image_embeds, clip_embed[None])
@@ -152,10 +152,15 @@ def main():
     def run(x, clip_embed):
         t = torch.linspace(1, 0, args.steps + 1, device=device)[:-1]
         steps = utils.get_spliced_ddpm_cosine_schedule(t)
-        extra_args = {'clip_embed': clip_embed} if hasattr(model, 'clip_model') else {}
+        if hasattr(model, 'clip_model'):
+            extra_args = {'clip_embed': clip_embed}
+            cond_fn_ = cond_fn
+        else:
+            extra_args = {}
+            cond_fn_ = partial(cond_fn, clip_embed=clip_embed)
         if not args.clip_guidance_scale:
             return sampling.sample(model, x, steps, args.eta, extra_args)
-        return sampling.cond_sample(model, x, steps, args.eta, extra_args, cond_fn)
+        return sampling.cond_sample(model, x, steps, args.eta, extra_args, cond_fn_)
 
     def run_all(n, batch_size):
         x = torch.randn([args.n, 3, side_y, side_x], device=device)
