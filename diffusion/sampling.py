@@ -33,16 +33,16 @@ def sample_step_noise(model, x, steps, eta, extra_args, ts, alphas, sigmas, i, p
         x = pred * alphas[i + 1] + eps * adjusted_sigma
 
         # Add the correct amount of fresh noise
-        if eta:
-            x += torch.randn_like(x) * ddim_sigma
 
-    # update x and pred (only?)
+        if eta:
+            x = x + torch.randn_like(x) * ddim_sigma
+
     return x
 
 def sample_setup(model, x, steps, eta, extra_args):
     """Draws samples from a model given starting noise."""
 
-    print("SAMPLE SETUP ", steps.shape)
+    # print("SAMPLE SETUP ", steps.shape)
     ts = x.new_ones([x.shape[0]])
 
     # Create the noise schedule
@@ -55,8 +55,8 @@ def sample_step(sample_state, x, i, last_pred, last_v):
     model, steps, eta, extra_args, ts, alphas, sigmas = sample_state
 
     # print("SAMPLE STEP ", i)
-    if last_pred != None:
-        x = sample_step_noise(model, x, steps, eta, extra_args, ts, alphas, sigmas, i, last_pred, last_v)
+    if last_pred != None and i > 0:
+        x = sample_step_noise(model, x, steps, eta, extra_args, ts, alphas, sigmas, i-1, last_pred, last_v)
     pred, v = sample_step_pred(model, x, steps, eta, extra_args, ts, alphas, sigmas, i)
 
     return pred, v, x
