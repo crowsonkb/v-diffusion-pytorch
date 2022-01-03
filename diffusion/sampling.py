@@ -53,13 +53,15 @@ def sample_setup(model, x, steps, eta, extra_args):
 
 def sample_step(sample_state, x, i, last_pred, last_v):
     model, steps, eta, extra_args, ts, alphas, sigmas = sample_state
-
-    # print("SAMPLE STEP ", i)
-    if last_pred != None and i > 0:
-        x = sample_step_noise(model, x, steps, eta, extra_args, ts, alphas, sigmas, i-1, last_pred, last_v)
     pred, v = sample_step_pred(model, x, steps, eta, extra_args, ts, alphas, sigmas, i)
-
     return pred, v, x
+
+
+def noise(sample_state, x, i, last_pred, last_v):
+    model, steps, eta, extra_args, ts, alphas, sigmas = sample_state
+    if last_pred != None and i > 0:
+        newx = sample_step_noise(model, x, steps, eta, extra_args, ts, alphas, sigmas, i, last_pred, last_v)
+    return newx
 
 # this version of sample calls the above four functions to do the work
 
