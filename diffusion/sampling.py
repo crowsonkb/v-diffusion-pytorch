@@ -57,25 +57,24 @@ def sample_step(sample_state, x, i, last_pred, last_v):
     return pred, v, x
 
 
-def noise(sample_state, x, i, last_pred, last_v):
+def sample_noise(sample_state, x, i, last_pred, last_v):
     model, steps, eta, extra_args, ts, alphas, sigmas = sample_state
-    if last_pred != None and i > 0:
-        newx = sample_step_noise(model, x, steps, eta, extra_args, ts, alphas, sigmas, i, last_pred, last_v)
-    return newx
+    if last_pred != None:
+        x = sample_step_noise(model, x, steps, eta, extra_args, ts, alphas, sigmas, i, last_pred, last_v)
+    return x
 
-# this version of sample calls the above four functions to do the work
-
+# this new version of sample calls the above four functions to do the work
 def sample(model, x, steps, eta, extra_args):
     pred = None
     v = None
     sample_state = sample_setup(model, x, steps, eta, extra_args)
     for i in trange(len(steps)):
         pred, v, x = sample_step(sample_state, x, i, pred, v)
+        x = sample_noise(sample_state, x, i, pred, v)
 
     return pred
 
 # this is the original version of sample which did everything at once
-
 @torch.no_grad()
 def sample_original(model, x, steps, eta, extra_args):
     """Draws samples from a model given starting noise."""
