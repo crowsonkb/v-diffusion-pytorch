@@ -39,7 +39,7 @@ A 968M parameter unconditional model trained on a 33 million image original reso
 If the model checkpoint for cc12m_1_cfg is stored in `checkpoints/`, the following will generate four images:
 
 ```
-./cfg_sample.py "the rise of consciousness" -n 4 -bs 4 --seed 0
+./cfg_sample.py "the rise of consciousness":5 -n 4 -bs 4 --seed 0
 ```
 
 If they are somewhere else, you need to specify the path to the checkpoint with `--checkpoint`.
