@@ -1,5 +1,5 @@
 import torch
-from tqdm import trange
+from tqdm.auto import trange
 
 from . import utils
 
