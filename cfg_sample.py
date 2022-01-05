@@ -5,17 +5,32 @@
 import argparse
 from functools import partial
 from pathlib import Path
-
+import os
+from types import SimpleNamespace
 from PIL import Image
 import torch
 from torch import nn
 from torch.nn import functional as F
 from torchvision import transforms
 from torchvision.transforms import functional as TF
-from tqdm import trange
+from torchvision.utils import save_image
 
 from CLIP import clip
-from diffusion import get_model, get_models, sampling, utils
+from diffusion import get_model, get_models, sampling, utils, download_model
+
+def isnotebook():
+    try:
+        shell = get_ipython().__class__.__name__
+        return shell=='ZMQInteractiveShell' or shell=='Shell'
+    except NameError:
+        return False      
+IS_NOTEBOOK = isnotebook()
+if IS_NOTEBOOK:
+    from IPython import display
+    from tqdm.notebook import trange
+else:
+    from tqdm import trange
+
 
 MODULE_DIR = Path(__file__).resolve().parent
 
@@ -80,6 +95,8 @@ def main():
     checkpoint = args.checkpoint
     if not checkpoint:
         checkpoint = MODULE_DIR / f'checkpoints/{args.model}.pth'
+    if not os.path.isfile(checkpoint):
+        download_model(args.model, checkpoint)
     model.load_state_dict(torch.load(checkpoint, map_location='cpu'))
     if device.type == 'cuda':
         model = model.half()
@@ -117,6 +134,13 @@ def main():
 
     torch.manual_seed(args.seed)
 
+    def callback_fn(pred, i):
+        if i % 50==0 or i==args.steps:
+            out = pred.add(1).div(2)
+            save_image(out, f"interm_output_{i:05d}.png")
+            if IS_NOTEBOOK:
+                display.display(display.Image(f"interm_output_{i:05d}.png",height=300))
+
     def cfg_model_fn(x, t):
         n = x.shape[0]
         n_conds = len(target_embeds)
@@ -128,7 +152,110 @@ def main():
         return v
 
     def run(x, steps):
-        return sampling.sample(cfg_model_fn, x, steps, args.eta, {})
+        return sampling.sample(cfg_model_fn, x, steps, args.eta, {}, callback_fn=callback_fn)
+
+    def run_all(n, batch_size):
+        x = torch.randn([args.n, 3, side_y, side_x], device=device)
+        t = torch.linspace(1, 0, args.steps + 1, device=device)[:-1]
+        steps = utils.get_spliced_ddpm_cosine_schedule(t)
+        if args.init:
+            steps = steps[steps < args.starting_timestep]
+            alpha, sigma = utils.t_to_alpha_sigma(steps[0])
+            x = init * alpha + x * sigma
+        for i in trange(0, n, batch_size):
+            cur_batch_size = min(n - i, batch_size)
+            outs = run(x[i:i+cur_batch_size], steps)
+            for j, out in enumerate(outs):
+                utils.to_pil_image(out).save(f'out_{i + j:05}.png')
+
+    try:
+        run_all(args.n, args.batch_size)
+    except KeyboardInterrupt:
+        pass
+
+
+def run_diffusion_cfg(prompts,images=None,steps=1000,init=None,model="cc12m_1_cfg",size=[512,512], checkpoint=None, device=None, eta=1.0, n=1, seed=42,starting_timestep=0.9, batch_size=1,display_freq=50):
+
+    args = SimpleNamespace(prompts=prompts,images=images,steps=steps,init=init,model=model,size=size, checkpoint=checkpoint, device=device, eta=eta, n=n, seed=seed,starting_timestep=starting_timestep, batch_size=batch_size)
+    print(args)
+
+    if args.device:
+        device = torch.device(args.device)
+    else:
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    print('Using device:', device)
+
+    model = get_model(args.model)()
+    _, side_y, side_x = model.shape
+    if args.size:
+        side_x, side_y = args.size
+    checkpoint = args.checkpoint
+    if not checkpoint:
+        checkpoint = MODULE_DIR / f'checkpoints/{args.model}.pth'
+    if not os.path.isfile(checkpoint):
+        download_model(args.model, checkpoint)
+    model.load_state_dict(torch.load(checkpoint, map_location='cpu'))
+    if device.type == 'cuda':
+        model = model.half()
+    model = model.to(device).eval().requires_grad_(False)
+    clip_model_name = model.clip_model if hasattr(model, 'clip_model') else 'ViT-B/16'
+    clip_model = clip.load(clip_model_name, jit=False, device=device)[0]
+    clip_model.eval().requires_grad_(False)
+    normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
+                                     std=[0.26862954, 0.26130258, 0.27577711])
+
+    if args.init:
+        init = Image.open(utils.fetch(args.init)).convert('RGB')
+        init = resize_and_center_crop(init, (side_x, side_y))
+        init = utils.from_pil_image(init).cuda()[None].repeat([args.n, 1, 1, 1])
+
+    zero_embed = torch.zeros([1, clip_model.visual.output_dim], device=device)
+    target_embeds, weights = [zero_embed], []
+
+    if args.prompts:
+        if isinstance(args.prompts, str):
+            args.prompts = [args.prompts,]
+        for prompt in args.prompts:
+            txt, weight = parse_prompt(prompt)
+            target_embeds.append(clip_model.encode_text(clip.tokenize(txt).to(device)).float())
+            weights.append(weight)
+
+    if args.images:
+        if isinstance(args.images, str):
+            args.images = [args.images,]
+        for prompt in args.images:
+            path, weight = parse_prompt(prompt)
+            img = Image.open(utils.fetch(path)).convert('RGB')
+            clip_size = clip_model.visual.input_resolution
+            img = resize_and_center_crop(img, (clip_size, clip_size))
+            batch = TF.to_tensor(img)[None].to(device)
+            embed = F.normalize(clip_model.encode_image(normalize(batch)).float(), dim=-1)
+            target_embeds.append(embed)
+            weights.append(weight)
+
+    weights = torch.tensor([1 - sum(weights), *weights], device=device)
+
+    torch.manual_seed(args.seed)
+
+    def callback_fn(pred, i):
+        if i % display_freq==0 or i==args.steps:
+            out = pred.add(1).div(2)
+            save_image(out, f"interm_output_{i:05d}.png")
+            if IS_NOTEBOOK:
+                display.display(display.Image(f"interm_output_{i:05d}.png",height=300))
+
+    def cfg_model_fn(x, t):
+        n = x.shape[0]
+        n_conds = len(target_embeds)
+        x_in = x.repeat([n_conds, 1, 1, 1])
+        t_in = t.repeat([n_conds])
+        clip_embed_in = torch.cat([*target_embeds]).repeat_interleave(n, 0)
+        vs = model(x_in, t_in, clip_embed_in).view([n_conds, n, *x.shape[1:]])
+        v = vs.mul(weights[:, None, None, None, None]).sum(0)
+        return v
+
+    def run(x, steps):
+        return sampling.sample(cfg_model_fn, x, steps, args.eta, {}, callback_fn=callback_fn)
 
     def run_all(n, batch_size):
         x = torch.randn([args.n, 3, side_y, side_x], device=device)

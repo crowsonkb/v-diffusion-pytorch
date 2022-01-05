@@ -1,11 +1,21 @@
 import torch
-from tqdm import trange
+def isnotebook():
+    try:
+        shell = get_ipython().__class__.__name__
+        return shell=='ZMQInteractiveShell' or shell=='Shell'
+    except NameError:
+        return False      
+IS_NOTEBOOK = isnotebook()
+if IS_NOTEBOOK:
+    from tqdm.notebook import trange
+else:
+    from tqdm import trange
 
 from . import utils
 
 
 @torch.no_grad()
-def sample(model, x, steps, eta, extra_args):
+def sample(model, x, steps, eta, extra_args, callback_fn=None):
     """Draws samples from a model given starting noise."""
     ts = x.new_ones([x.shape[0]])
 
@@ -40,12 +50,15 @@ def sample(model, x, steps, eta, extra_args):
             if eta:
                 x += torch.randn_like(x) * ddim_sigma
 
+        if callback_fn:
+            callback_fn(pred,i)
+
     # If we are on the last timestep, output the denoised image
     return pred
 
 
 @torch.no_grad()
-def cond_sample(model, x, steps, eta, extra_args, cond_fn):
+def cond_sample(model, x, steps, eta, extra_args, cond_fn, callback_fn=None):
     """Draws guided samples from a model given starting noise."""
     ts = x.new_ones([x.shape[0]])
 
@@ -88,6 +101,9 @@ def cond_sample(model, x, steps, eta, extra_args, cond_fn):
             # Add the correct amount of fresh noise
             if eta:
                 x += torch.randn_like(x) * ddim_sigma
+
+        if callback_fn:
+            callback_fn(pred,i)
 
     # If we are on the last timestep, output the denoised image
     return pred
