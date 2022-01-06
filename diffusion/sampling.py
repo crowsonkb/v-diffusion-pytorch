@@ -23,6 +23,10 @@ def sample(model, x, steps, eta, extra_args, callback=None):
         pred = x * alphas[i] - v * sigmas[i]
         eps = x * sigmas[i] + v * alphas[i]
 
+        # Call the callback
+        if callback is not None:
+            callback({'x': x, 'i': i, 't': steps[i], 'v': v, 'pred': pred})
+
         # If we are not on the last timestep, compute the noisy image for the
         # next timestep.
         if i < len(steps) - 1:
@@ -64,8 +68,13 @@ def cond_sample(model, x, steps, eta, extra_args, cond_fn, callback=None):
             with torch.cuda.amp.autocast():
                 v = model(x, ts * steps[i], **extra_args)
 
+            pred = x * alphas[i] - v * sigmas[i]
+
+            # Call the callback
+            if callback is not None:
+                callback({'x': x, 'i': i, 't': steps[i], 'v': v.detach(), 'pred': pred.detach()})
+
             if steps[i] < 1:
-                pred = x * alphas[i] - v * sigmas[i]
                 cond_grad = cond_fn(x, ts * steps[i], pred, **extra_args).detach()
                 v = v.detach() - cond_grad * (sigmas[i] / alphas[i])
             else:
