@@ -14,6 +14,7 @@ from torch.nn import functional as F
 from torchvision import transforms
 from torchvision.transforms import functional as TF
 from torchvision.utils import save_image
+from tqdm.auto import trange
 
 from CLIP import clip
 from diffusion import get_model, get_models, sampling, utils, download_model
@@ -28,9 +29,6 @@ def isnotebook():
 IS_NOTEBOOK = isnotebook()
 if IS_NOTEBOOK:
     from IPython import display
-    from tqdm.notebook import trange
-else:
-    from tqdm import trange
 
 
 
