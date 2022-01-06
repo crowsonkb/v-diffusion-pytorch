@@ -152,7 +152,7 @@ def main():
         return v
 
     def run(x, steps):
-        return sampling.sample(cfg_model_fn, x, steps, args.eta, {}, callback_fn=callback_fn)
+        return sampling.sample(cfg_model_fn, x, steps, args.eta, {}, callback=callback_fn)
 
     def run_all(n, batch_size):
         x = torch.randn([args.n, 3, side_y, side_x], device=device)
@@ -255,7 +255,7 @@ def run_diffusion_cfg(prompts,images=None,steps=1000,init=None,model="cc12m_1_cf
         return v
 
     def run(x, steps):
-        return sampling.sample(cfg_model_fn, x, steps, args.eta, {}, callback_fn=callback_fn)
+        return sampling.sample(cfg_model_fn, x, steps, args.eta, {}, callback=callback_fn)
 
     def run_all(n, batch_size):
         x = torch.randn([args.n, 3, side_y, side_x], device=device)

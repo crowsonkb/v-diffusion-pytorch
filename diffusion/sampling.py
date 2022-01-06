@@ -1,21 +1,11 @@
 import torch
-def isnotebook():
-    try:
-        shell = get_ipython().__class__.__name__
-        return shell=='ZMQInteractiveShell' or shell=='Shell'
-    except NameError:
-        return False      
-IS_NOTEBOOK = isnotebook()
-if IS_NOTEBOOK:
-    from tqdm.notebook import trange
-else:
-    from tqdm import trange
+from tqdm.auto import trange
 
 from . import utils
 
 
 @torch.no_grad()
-def sample(model, x, steps, eta, extra_args, callback_fn=None):
+def sample(model, x, steps, eta, extra_args, callback=None):
     """Draws samples from a model given starting noise."""
     ts = x.new_ones([x.shape[0]])
 
@@ -58,7 +48,7 @@ def sample(model, x, steps, eta, extra_args, callback_fn=None):
 
 
 @torch.no_grad()
-def cond_sample(model, x, steps, eta, extra_args, cond_fn, callback_fn=None):
+def cond_sample(model, x, steps, eta, extra_args, cond_fn, callback=None):
     """Draws guided samples from a model given starting noise."""
     ts = x.new_ones([x.shape[0]])
 

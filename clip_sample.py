@@ -201,8 +201,8 @@ def main():
             extra_args = {}
             cond_fn_ = partial(cond_fn, clip_embed=clip_embed)
         if not args.clip_guidance_scale:
-            return sampling.sample(model, x, steps, args.eta, extra_args, callback_fn=callback_fn)
-        return sampling.cond_sample(model, x, steps, args.eta, extra_args, cond_fn_, callback_fn=callback_fn)
+            return sampling.sample(model, x, steps, args.eta, extra_args, callback=callback_fn)
+        return sampling.cond_sample(model, x, steps, args.eta, extra_args, cond_fn_, callback=callback_fn)
 
     def run_all(n, batch_size):
         x = torch.randn([args.n, 3, side_y, side_x], device=device)
@@ -320,8 +320,8 @@ def run_diffusion(prompts,images=None,steps=1000,init=None,model="yfcc_2",size=[
             extra_args = {}
             cond_fn_ = partial(cond_fn, clip_embed=clip_embed)
         if not args.clip_guidance_scale:
-            return sampling.sample(model, x, steps, args.eta, extra_args, callback_fn=callback_fn)
-        return sampling.cond_sample(model, x, steps, args.eta, extra_args, cond_fn_, callback_fn=callback_fn)
+            return sampling.sample(model, x, steps, args.eta, extra_args, callback=callback_fn)
+        return sampling.cond_sample(model, x, steps, args.eta, extra_args, cond_fn_, callback=callback_fn)
 
     def run_all(n, batch_size):
         x = torch.randn([args.n, 3, side_y, side_x], device=device)
