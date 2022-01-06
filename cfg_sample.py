@@ -48,6 +48,12 @@ def resize_and_center_crop(image, size):
     image = image.resize((int(fac * image.size[0]), int(fac * image.size[1])), Image.LANCZOS)
     return TF.center_crop(image, size[::-1])
 
+def callback_fn(info):
+    if info['i'] % 50==0:
+        out = info['pred'].add(1).div(2)
+        save_image(out, f"interm_output_{info['i']:05d}.png")
+        if IS_NOTEBOOK:
+            display.display(display.Image(f"interm_output_{info['i']:05d}.png",height=300))
 
 def main():
     p = argparse.ArgumentParser(description=__doc__,
@@ -131,13 +137,6 @@ def main():
     weights = torch.tensor([1 - sum(weights), *weights], device=device)
 
     torch.manual_seed(args.seed)
-
-    def callback_fn(pred, i):
-        if i % 50==0 or i==args.steps:
-            out = pred.add(1).div(2)
-            save_image(out, f"interm_output_{i:05d}.png")
-            if IS_NOTEBOOK:
-                display.display(display.Image(f"interm_output_{i:05d}.png",height=300))
 
     def cfg_model_fn(x, t):
         n = x.shape[0]
@@ -234,13 +233,6 @@ def run_diffusion_cfg(prompts,images=None,steps=1000,init=None,model="cc12m_1_cf
     weights = torch.tensor([1 - sum(weights), *weights], device=device)
 
     torch.manual_seed(args.seed)
-
-    def callback_fn(pred, i):
-        if i % display_freq==0 or i==args.steps:
-            out = pred.add(1).div(2)
-            save_image(out, f"interm_output_{i:05d}.png")
-            if IS_NOTEBOOK:
-                display.display(display.Image(f"interm_output_{i:05d}.png",height=300))
 
     def cfg_model_fn(x, t):
         n = x.shape[0]

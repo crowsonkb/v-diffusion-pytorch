@@ -77,6 +77,12 @@ def resize_and_center_crop(image, size):
     image = image.resize((int(fac * image.size[0]), int(fac * image.size[1])), Image.LANCZOS)
     return TF.center_crop(image, size[::-1])
 
+def callback_fn(info):
+    if info['i'] % 50==0:
+        out = info['pred'].add(1).div(2)
+        save_image(out, f"interm_output_{info['i']:05d}.png")
+        if IS_NOTEBOOK:
+            display.display(display.Image(f"interm_output_{info['i']:05d}.png",height=300))
 
 def main():
     p = argparse.ArgumentParser(description=__doc__,
@@ -175,13 +181,6 @@ def main():
     clip_embed = clip_embed.repeat([args.n, 1])
 
     torch.manual_seed(args.seed)
-
-    def callback_fn(pred, i):
-        if i % 50==0 or i==args.steps:
-            out = pred.add(1).div(2)
-            save_image(out, f"interm_output_{i:05d}.png")
-            if IS_NOTEBOOK:
-                display.display(display.Image(f"interm_output_{i:05d}.png",height=300))
 
     def cond_fn(x, t, pred, clip_embed):
         clip_in = normalize(make_cutouts((pred + 1) / 2))
@@ -294,13 +293,6 @@ def run_diffusion(prompts,images=None,steps=1000,init=None,model="yfcc_2",size=[
     clip_embed = clip_embed.repeat([args.n, 1])
 
     torch.manual_seed(args.seed)
-
-    def callback_fn(pred, i):
-        if i % display_freq==0 or i==args.steps:
-            out = pred.add(1).div(2)
-            save_image(out, f"interm_output_{i:05d}.png")
-            if IS_NOTEBOOK:
-                display.display(display.Image(f"interm_output_{i:05d}.png",height=300))
 
     def cond_fn(x, t, pred, clip_embed):
         clip_in = normalize(make_cutouts((pred + 1) / 2))
