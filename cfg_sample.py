@@ -93,7 +93,7 @@ def main():
     if args.init:
         init = Image.open(utils.fetch(args.init)).convert('RGB')
         init = resize_and_center_crop(init, (side_x, side_y))
-        init = utils.from_pil_image(init).cuda()[None].repeat([args.n, 1, 1, 1])
+        init = utils.from_pil_image(init).to(device)[None].repeat([args.n, 1, 1, 1])
 
     zero_embed = torch.zeros([1, clip_model.visual.output_dim], device=device)
     target_embeds, weights = [zero_embed], []
