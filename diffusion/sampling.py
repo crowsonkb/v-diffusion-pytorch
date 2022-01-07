@@ -100,3 +100,34 @@ def cond_sample(model, x, steps, eta, extra_args, cond_fn, callback=None):
 
     # If we are on the last timestep, output the denoised image
     return pred
+
+
+@torch.no_grad()
+def reverse_sample(model, x, steps, extra_args, callback=None):
+    """Finds a starting latent that would produce the given image with DDIM
+    (eta=0) sampling."""
+    ts = x.new_ones([x.shape[0]])
+
+    # Create the noise schedule
+    alphas, sigmas = utils.t_to_alpha_sigma(steps)
+
+    # The sampling loop
+    for i in trange(len(steps) - 1):
+
+        # Get the model output (v, the predicted velocity)
+        with torch.cuda.amp.autocast():
+            v = model(x, ts * steps[i], **extra_args).float()
+
+        # Predict the noise and the denoised image
+        pred = x * alphas[i] - v * sigmas[i]
+        eps = x * sigmas[i] + v * alphas[i]
+
+        # Call the callback
+        if callback is not None:
+            callback({'x': x, 'i': i, 't': steps[i], 'v': v, 'pred': pred})
+
+        # Recombine the predicted noise and predicted denoised image in the
+        # correct proportions for the next step
+        x = pred * alphas[i + 1] + eps * sigmas[i + 1]
+
+    return x
