@@ -74,3 +74,10 @@ def get_spliced_ddpm_cosine_schedule(t):
     big_t = t * (1 + cosine_crossover - ddpm_crossover)
     ddpm_part = get_ddpm_schedule(big_t + ddpm_crossover - cosine_crossover)
     return torch.where(big_t < cosine_crossover, big_t, ddpm_part)
+
+
+def get_log_schedule(t, min_log_snr=-10, max_log_snr=10):
+    """Returns timesteps for a logarithmically spaced schedule."""
+    log_snr = t * (min_log_snr - max_log_snr) + max_log_snr
+    alpha, sigma = log_snr_to_alpha_sigma(log_snr)
+    return alpha_sigma_to_t(alpha, sigma)
