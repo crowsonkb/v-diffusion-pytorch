@@ -13,7 +13,7 @@ def sample(model, x, steps, eta, extra_args, callback=None):
     alphas, sigmas = utils.t_to_alpha_sigma(steps)
 
     # The sampling loop
-    for i in trange(len(steps)):
+    for i in trange(len(steps), disable=None):
 
         # Get the model output (v, the predicted velocity)
         with torch.cuda.amp.autocast():
@@ -57,7 +57,7 @@ def cond_sample(model, x, steps, eta, extra_args, cond_fn, callback=None):
     alphas, sigmas = utils.t_to_alpha_sigma(steps)
 
     # The sampling loop
-    for i in trange(len(steps)):
+    for i in trange(len(steps), disable=None):
 
         # Get the model output
         with torch.enable_grad():
@@ -112,7 +112,7 @@ def reverse_sample(model, x, steps, extra_args, callback=None):
     alphas, sigmas = utils.t_to_alpha_sigma(steps)
 
     # The sampling loop
-    for i in trange(len(steps) - 1):
+    for i in trange(len(steps) - 1, disable=None):
 
         # Get the model output (v, the predicted velocity)
         with torch.cuda.amp.autocast():
