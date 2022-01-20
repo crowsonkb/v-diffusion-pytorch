@@ -44,6 +44,7 @@ def sample(model, x, steps, eta, extra_args, callback=None):
             if eta:
                 x += torch.randn_like(x) * ddim_sigma
 
+
     # If we are on the last timestep, output the denoised image
     return pred
 
@@ -97,6 +98,7 @@ def cond_sample(model, x, steps, eta, extra_args, cond_fn, callback=None):
             # Add the correct amount of fresh noise
             if eta:
                 x += torch.randn_like(x) * ddim_sigma
+
 
     # If we are on the last timestep, output the denoised image
     return pred
