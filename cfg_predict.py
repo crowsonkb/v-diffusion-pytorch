@@ -50,9 +50,12 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
             std=[0.26862954, 0.26130258, 0.27577711]
         )
 
+    @property
+    def output_dim(self):
+        return self.clip.visual.output_dim
+
     def normalize(self, image):
         return self.normalize_fn(image)
-
 
     def cfg_sample_fn(self, x, t, target_embeds, weights):
         n = x.shape[0]
@@ -64,7 +67,6 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
         v = vs.mul(weights[:, None, None, None, None]).sum(0)
         return v
 
-    
     def run_sampling(self, x, steps, eta):
         return sampling.sample(self.cfg_sample_fn, x, steps, eta, {})
 
@@ -76,7 +78,7 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
         """Run a single prediction on the model"""
         _, side_y, side_x = self.model.shape
         torch.manual_seed(seed)
-        zero_embed = torch.zeros([1, clip.visual.output_dim], device=self.device)
+        zero_embed = torch.zeros([1, self.output_dim], device=self.device)
         target_embeds, weights = [zero_embed], []
         txt, weight = parse_prompt(prompt)
         target_embeds.append(self.clip.encode_text(clip.tokenize(txt).to(self.device)).float())
