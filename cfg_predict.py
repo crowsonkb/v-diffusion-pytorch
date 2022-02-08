@@ -88,6 +88,6 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
         t = torch.linspace(1, 0, steps + 1, device=self.device)[:-1]
         steps = utils.get_spliced_ddpm_cosine_schedule(t)
         output_image = self.run_sampling(x, steps, eta, cfg_sample_fn)
-        out_path = Path(tempfile.mkdtemp()) / "my-file.txt"
+        out_path = Path(tempfile.mkdtemp()) / "out.png"
         utils.to_pil_image(output_image).save(out_path)
         return out_path
