@@ -31,7 +31,7 @@ def parse_prompt(prompt, default_weight=3.):
     return vals[0], float(vals[1])
 
 
-class ClassifierFreeGuidanceDiffusionSampler(cog.Predictor):
+class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
     model_name = 'cc12m_1_cfg'
     checkpoint_path = 'checkpoints/cc12m_1_cfg.pth'
     device = 'cuda:0'

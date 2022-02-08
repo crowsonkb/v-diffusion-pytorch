@@ -4,7 +4,7 @@
 build:
   # set to true if your model requires a GPU
   gpu: true
-  
+
   # python version in the form '3.8' or '3.8.12'
   python_version: "3.8"
 
@@ -21,4 +21,4 @@ build:
     - "pip install git+https://github.com/openai/CLIP.git@40f5484c1c74edd83cb9cf687c6ab92b28d8b656"
 
 # predict.py defines how predictions are run on your model
-predict: "cfg_predict.py:Predictor"
+predict: "cfg_predict.py:ClassifierFreeGuidanceDiffusionPredictor"
