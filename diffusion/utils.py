@@ -62,7 +62,7 @@ def alpha_sigma_to_t(alpha, sigma):
 
 def get_ddpm_schedule(ddpm_t):
     """Returns timesteps for the noise schedule from the DDPM paper."""
-    log_snr = -torch.special.expm1(1e-4 + 10 * ddpm_t**2).log()
+    log_snr = -torch.expm1(1e-4 + 10 * ddpm_t**2).log()
     alpha, sigma = log_snr_to_alpha_sigma(log_snr)
     return alpha_sigma_to_t(alpha, sigma)
 
