@@ -57,18 +57,8 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
     def normalize(self, image):
         return self.normalize_fn(image)
 
-    def cfg_sample_fn(self, x, t, target_embeds, weights):
-        n = x.shape[0]
-        n_conds = len(target_embeds)
-        x_in = x.repeat([n_conds, 1, 1, 1])
-        t_in = t.repeat([n_conds])
-        clip_embed_in = torch.cat([*target_embeds]).repeat_interleave(n, 0)
-        vs = self.model(x_in, t_in, clip_embed_in).view([n_conds, n, *x.shape[1:]])
-        v = vs.mul(weights[:, None, None, None, None]).sum(0)
-        return v
-
-    def run_sampling(self, x, steps, eta):
-        return sampling.sample(self.cfg_sample_fn, x, steps, eta, {})
+    def run_sampling(self, x, steps, eta, sample_fn):
+        return sampling.sample(sample_fn, x, steps, eta, {})
 
     @cog.input('prompt', type=str, help='The prompt for image generation')
     @cog.input("eta", type=float, default=1.0, help='The amount of randomness')
@@ -83,10 +73,21 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
         txt, weight = parse_prompt(prompt)
         target_embeds.append(self.clip.encode_text(clip.tokenize(txt).to(self.device)).float())
         weights.append(weight)
+
+        def cfg_sample_fn(x, t):
+            n = x.shape[0]
+            n_conds = len(target_embeds)
+            x_in = x.repeat([n_conds, 1, 1, 1])
+            t_in = t.repeat([n_conds])
+            clip_embed_in = torch.cat([*target_embeds]).repeat_interleave(n, 0)
+            vs = self.model(x_in, t_in, clip_embed_in).view([n_conds, n, *x.shape[1:]])
+            v = vs.mul(weights[:, None, None, None, None]).sum(0)
+            return v
+            
         x = torch.randn([1, 3, side_y, side_x], device=self.device)
         t = torch.linspace(1, 0, steps + 1, device=self.device)[:-1]
         steps = utils.get_spliced_ddpm_cosine_schedule(t)
-        output_image = self.run_sampling(x, steps, eta)
+        output_image = self.run_sampling(x, steps, eta, cfg_sample_fn)
         out_path = Path(tempfile.mkdtemp()) / "my-file.txt"
         utils.to_pil_image(output_image).save(out_path)
         return out_path
