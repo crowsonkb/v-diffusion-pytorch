@@ -73,7 +73,7 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
         txt, weight = parse_prompt(prompt)
         target_embeds.append(self.clip.encode_text(clip.tokenize(txt).to(self.device)).float())
         weights.append(weight)
-
+        weights = torch.tensor([1 - sum(weights), *weights], device=self.device)
         def cfg_sample_fn(x, t):
             n = x.shape[0]
             n_conds = len(target_embeds)
@@ -83,7 +83,7 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
             vs = self.model(x_in, t_in, clip_embed_in).view([n_conds, n, *x.shape[1:]])
             v = vs.mul(weights[:, None, None, None, None]).sum(0)
             return v
-            
+
         x = torch.randn([1, 3, side_y, side_x], device=self.device)
         t = torch.linspace(1, 0, steps + 1, device=self.device)[:-1]
         steps = utils.get_spliced_ddpm_cosine_schedule(t)
