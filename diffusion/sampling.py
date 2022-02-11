@@ -189,7 +189,8 @@ def prk_sample(model, x, steps, extra_args, is_reverse=False, callback=None):
     """Draws samples from a model given starting noise using Pseudo Runge-Kutta."""
     ts = x.new_ones([x.shape[0]])
     model_fn = make_autocast_model_fn(model)
-    steps = torch.cat([steps, steps.new_zeros([1])])
+    if not is_reverse:
+        steps = torch.cat([steps, steps.new_zeros([1])])
     for i in trange(len(steps) - 1, disable=None):
         x, _, pred = prk_step(model_fn, x, steps[i] * ts, steps[i + 1] * ts, extra_args)
         if callback is not None:
@@ -202,7 +203,8 @@ def plms_sample(model, x, steps, extra_args, is_reverse=False, callback=None):
     """Draws samples from a model given starting noise using Pseudo Linear Multistep."""
     ts = x.new_ones([x.shape[0]])
     model_fn = make_autocast_model_fn(model)
-    steps = torch.cat([steps, steps.new_zeros([1])])
+    if not is_reverse:
+        steps = torch.cat([steps, steps.new_zeros([1])])
     old_eps = []
     for i in trange(len(steps) - 1, disable=None):
         if len(old_eps) < 3:
