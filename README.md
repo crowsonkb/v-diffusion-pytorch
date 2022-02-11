@@ -2,7 +2,7 @@
 
 v objective diffusion inference code for PyTorch, by Katherine Crowson ([@RiversHaveWings](https://twitter.com/RiversHaveWings)) and Chainbreakers AI ([@jd_pressman](https://twitter.com/jd_pressman)).
 
-The models are denoising diffusion probabilistic models (https://arxiv.org/abs/2006.11239), which are trained to reverse a gradual noising process, allowing the models to generate samples from the learned data distributions starting from random noise. DDIM-style deterministic sampling (https://arxiv.org/abs/2010.02502) is also supported. The models are also trained on continuous timesteps. They use the 'v' objective from Progressive Distillation for Fast Sampling of Diffusion Models (https://openreview.net/forum?id=TIdIXIpzhoI). Guided diffusion sampling scripts (https://arxiv.org/abs/2105.05233) are included, specifically CLIP guided diffusion. This repo also includes a diffusion model conditioned on CLIP text embeddings that supports classifier-free guidance (https://openreview.net/pdf?id=qw8AKxfYbI), similar to GLIDE (https://arxiv.org/abs/2112.10741).
+The models are denoising diffusion probabilistic models (https://arxiv.org/abs/2006.11239), which are trained to reverse a gradual noising process, allowing the models to generate samples from the learned data distributions starting from random noise. The models are also trained on continuous timesteps. They use the 'v' objective from Progressive Distillation for Fast Sampling of Diffusion Models (https://openreview.net/forum?id=TIdIXIpzhoI). Guided diffusion sampling scripts (https://arxiv.org/abs/2105.05233) are included, specifically CLIP guided diffusion. This repo also includes a diffusion model conditioned on CLIP text embeddings that supports classifier-free guidance (https://openreview.net/pdf?id=qw8AKxfYbI), similar to GLIDE (https://arxiv.org/abs/2112.10741). Sampling methods include DDPM, DDIM (https://arxiv.org/abs/2010.02502), and PRK/PLMS (https://openreview.net/forum?id=PlKWVd2yBkY).
 
 Thank you to [stability.ai](https://www.stability.ai) for compute to train these models!
 
@@ -49,8 +49,8 @@ If they are somewhere else, you need to specify the path to the checkpoint with 
 ```
 usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                      [--checkpoint CHECKPOINT] [--device DEVICE] [--eta ETA] [--init INIT]
-                     [--model {cc12m_1_cfg}] [-n N] [--seed SEED] [--size SIZE SIZE]
-                     [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
+                     [--method {ddpm,ddim,prk,plms}] [--model {cc12m_1_cfg}] [-n N] [--seed SEED]
+                     [--size SIZE SIZE] [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
                      [prompts ...]
 ```
 
@@ -62,11 +62,13 @@ usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--device`: the PyTorch device name to use (default autodetects)
 
-`--eta`: set to 0 for deterministic (DDIM) sampling, 1 (the default) for stochastic (DDPM) sampling, and in between to interpolate between the two. DDIM is preferred for low numbers of timesteps.
+`--eta`: set to 0 (the default) while using `--method ddim` for deterministic (DDIM) sampling, 1 for stochastic (DDPM) sampling, and in between to interpolate between the two.
 
 `--images`: the image prompts to use (local files or HTTP(S) URLs). Weights for image prompts can be specified by putting the weight after a colon, for example: `"image_1.png:5"`. The default weight is 3.
 
 `--init`: specify the init image (optional)
+
+`--method`: specify the sampling method to use (DDPM, DDIM, PRK, or PLMS) (default PLMS)
 
 `--model`: specify the model to use (default cc12m_1_cfg)
 
@@ -78,7 +80,7 @@ usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--size`: the output image size (default auto)
 
-`--steps`: specify the number of diffusion timesteps (default is 500, can lower for faster but lower quality sampling)
+`--steps`: specify the number of diffusion timesteps (default is 50, can be lower for faster but lower quality sampling, must be much higher with DDIM and especially DDPM)
 
 
 ### CLIP guided sampling (all models)

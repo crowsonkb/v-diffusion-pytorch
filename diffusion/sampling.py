@@ -4,6 +4,8 @@ from tqdm.auto import trange
 from . import utils
 
 
+# DDPM/DDIM sampling
+
 @torch.no_grad()
 def sample(model, x, steps, eta, extra_args, callback=None):
     """Draws samples from a model given starting noise."""
@@ -131,3 +133,84 @@ def reverse_sample(model, x, steps, extra_args, callback=None):
         x = pred * alphas[i + 1] + eps * sigmas[i + 1]
 
     return x
+
+
+# PNDM sampling (see https://openreview.net/pdf?id=PlKWVd2yBkY)
+
+def make_eps_model_fn(model):
+    def eps_model_fn(x, t, **extra_args):
+        alphas, sigmas = utils.t_to_alpha_sigma(t)
+        v = model(x, t, **extra_args)
+        eps = x * sigmas[:, None, None, None] + v * alphas[:, None, None, None]
+        return eps
+    return eps_model_fn
+
+
+def make_autocast_model_fn(model, enabled=True):
+    def autocast_model_fn(*args, **kwargs):
+        with torch.cuda.amp.autocast(enabled):
+            return model(*args, **kwargs).float()
+    return autocast_model_fn
+
+
+def transfer(x, eps, t_1, t_2):
+    alphas, sigmas = utils.t_to_alpha_sigma(t_1)
+    next_alphas, next_sigmas = utils.t_to_alpha_sigma(t_2)
+    pred = (x - eps * sigmas[:, None, None, None]) / alphas[:, None, None, None]
+    x = pred * next_alphas[:, None, None, None] + eps * next_sigmas[:, None, None, None]
+    return x, pred
+
+
+def prk_step(model, x, t_1, t_2, extra_args):
+    eps_model_fn = make_eps_model_fn(model)
+    t_mid = (t_2 + t_1) / 2
+    eps_1 = eps_model_fn(x, t_1, **extra_args)
+    x_1, _ = transfer(x, eps_1, t_1, t_mid)
+    eps_2 = eps_model_fn(x_1, t_mid, **extra_args)
+    x_2, _ = transfer(x, eps_2, t_1, t_mid)
+    eps_3 = eps_model_fn(x_2, t_mid, **extra_args)
+    x_3, _ = transfer(x, eps_3, t_1, t_2)
+    eps_4 = eps_model_fn(x_3, t_2, **extra_args)
+    eps_prime = (eps_1 + 2 * eps_2 + 2 * eps_3 + eps_4) / 6
+    x_new, pred = transfer(x, eps_prime, t_1, t_2)
+    return x_new, eps_prime, pred
+
+
+def plms_step(model, x, old_eps, t_1, t_2, extra_args):
+    eps_model_fn = make_eps_model_fn(model)
+    eps = eps_model_fn(x, t_1, **extra_args)
+    eps_prime = (55 * eps - 59 * old_eps[-1] + 37 * old_eps[-2] - 9 * old_eps[-3]) / 24
+    x_new, pred = transfer(x, eps_prime, t_1, t_2)
+    return x_new, eps, pred
+
+
+@torch.no_grad()
+def prk_sample(model, x, steps, extra_args, is_reverse=False, callback=None):
+    """Draws samples from a model given starting noise using Pseudo Runge-Kutta."""
+    ts = x.new_ones([x.shape[0]])
+    model_fn = make_autocast_model_fn(model)
+    steps = torch.cat([steps, steps.new_zeros([1])])
+    for i in trange(len(steps) - 1, disable=None):
+        x, _, pred = prk_step(model_fn, x, steps[i] * ts, steps[i + 1] * ts, extra_args)
+        if callback is not None:
+            callback({'x': x, 'i': i, 't': steps[i], 'pred': pred})
+    return x if is_reverse else pred
+
+
+@torch.no_grad()
+def plms_sample(model, x, steps, extra_args, is_reverse=False, callback=None):
+    """Draws samples from a model given starting noise using Pseudo Linear Multistep."""
+    ts = x.new_ones([x.shape[0]])
+    model_fn = make_autocast_model_fn(model)
+    steps = torch.cat([steps, steps.new_zeros([1])])
+    old_eps = []
+    for i in trange(len(steps) - 1, disable=None):
+        if len(old_eps) < 3:
+            x, eps, pred = prk_step(model_fn, x, steps[i] * ts, steps[i + 1] * ts, extra_args)
+        else:
+            x, eps, pred = plms_step(model_fn, x, old_eps, steps[i] * ts, steps[i + 1] * ts, extra_args)
+            old_eps.pop(0)
+        old_eps.append(eps)
+        if callback is not None:
+            callback({'x': x, 'i': i, 't': steps[i], 'pred': pred})
+    return x if is_reverse else pred
