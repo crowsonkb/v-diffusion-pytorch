@@ -82,10 +82,6 @@ class ClassifierFreeGuidanceDiffusionPredictor(cog.Predictor):
             vs = self.model(x_in, t_in, clip_embed_in).view([n_conds, n, *x.shape[1:]])
             v = vs.mul(weights[:, None, None, None, None]).sum(0)
             return v
-<<<<<<< HEAD
-
-=======
->>>>>>> 0f3d53b6bf9b7d335c4b45e57ccd224f1e8ecf8c
         x = torch.randn([1, 3, side_y, side_x], device=self.device)
         t = torch.linspace(1, 0, steps + 1, device=self.device)[:-1]
         steps = utils.get_spliced_ddpm_cosine_schedule(t)
