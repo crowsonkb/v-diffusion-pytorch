@@ -180,7 +180,8 @@ def plms_step(model, x, old_eps, t_1, t_2, extra_args):
     eps_model_fn = make_eps_model_fn(model)
     eps = eps_model_fn(x, t_1, **extra_args)
     eps_prime = (55 * eps - 59 * old_eps[-1] + 37 * old_eps[-2] - 9 * old_eps[-3]) / 24
-    x_new, pred = transfer(x, eps_prime, t_1, t_2)
+    x_new, _ = transfer(x, eps_prime, t_1, t_2)
+    _, pred = transfer(x, eps, t_1, t_2)
     return x_new, eps, pred
 
 
@@ -195,7 +196,7 @@ def prk_sample(model, x, steps, extra_args, is_reverse=False, callback=None):
         x, _, pred = prk_step(model_fn, x, steps[i] * ts, steps[i + 1] * ts, extra_args)
         if callback is not None:
             callback({'x': x, 'i': i, 't': steps[i], 'pred': pred})
-    return x if is_reverse else pred
+    return x
 
 
 @torch.no_grad()
@@ -215,4 +216,4 @@ def plms_sample(model, x, steps, extra_args, is_reverse=False, callback=None):
         old_eps.append(eps)
         if callback is not None:
             callback({'x': x, 'i': i, 't': steps[i], 'pred': pred})
-    return x if is_reverse else pred
+    return x
