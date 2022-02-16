@@ -54,7 +54,7 @@ def main():
     p.add_argument('--init', type=str,
                    help='the init image')
     p.add_argument('--method', type=str, default='plms',
-                   choices=['ddpm', 'ddim', 'prk', 'plms'],
+                   choices=['ddpm', 'ddim', 'prk', 'plms', 'pie', 'plms2'],
                    help='the sampling method to use')
     p.add_argument('--model', type=str, default='cc12m_1_cfg', choices=['cc12m_1_cfg'],
                    help='the model to use')
@@ -139,6 +139,10 @@ def main():
             return sampling.prk_sample(cfg_model_fn, x, steps, {})
         if args.method == 'plms':
             return sampling.plms_sample(cfg_model_fn, x, steps, {})
+        if args.method == 'pie':
+            return sampling.pie_sample(cfg_model_fn, x, steps, {})
+        if args.method == 'plms2':
+            return sampling.plms2_sample(cfg_model_fn, x, steps, {})
         assert False
 
     def run_all(n, batch_size):

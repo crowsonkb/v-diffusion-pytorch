@@ -64,6 +64,19 @@ def resize_and_center_crop(image, size):
     return TF.center_crop(image, size[::-1])
 
 
+def make_cond_model_fn(model, cond_fn):
+    def cond_model_fn(x, t, **extra_args):
+        with torch.enable_grad():
+            x = x.detach().requires_grad_()
+            v = model(x, t, **extra_args)
+            alphas, sigmas = utils.t_to_alpha_sigma(t)
+            pred = x * alphas[:, None, None, None] - v * sigmas[:, None, None, None]
+            cond_grad = cond_fn(x, t, pred, **extra_args).detach()
+            v = v.detach() - cond_grad * (sigmas[:, None, None, None] / alphas[:, None, None, None])
+        return v
+    return cond_model_fn
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -83,10 +96,13 @@ def main():
                    help='the random crop size power')
     p.add_argument('--device', type=str,
                    help='the device to use')
-    p.add_argument('--eta', type=float, default=1.,
+    p.add_argument('--eta', type=float, default=0.,
                    help='the amount of noise to add during sampling (0-1)')
     p.add_argument('--init', type=str,
                    help='the init image')
+    p.add_argument('--method', type=str, default='ddpm',
+                   choices=['ddpm', 'ddim', 'prk', 'plms', 'pie', 'plms2'],
+                   help='the sampling method to use')
     p.add_argument('--model', type=str, default='cc12m_1', choices=get_models(),
                    help='the model to use')
     p.add_argument('-n', type=int, default=1,
@@ -175,9 +191,23 @@ def main():
         else:
             extra_args = {}
             cond_fn_ = partial(cond_fn, clip_embed=clip_embed)
-        if not args.clip_guidance_scale:
-            return sampling.sample(model, x, steps, args.eta, extra_args)
-        return sampling.cond_sample(model, x, steps, args.eta, extra_args, cond_fn_)
+        if args.clip_guidance_scale:
+            model_fn = make_cond_model_fn(model, cond_fn_)
+        else:
+            model_fn = model
+        if args.method == 'ddpm':
+            return sampling.sample(model_fn, x, steps, 1., extra_args)
+        if args.method == 'ddim':
+            return sampling.sample(model_fn, x, steps, args.eta, extra_args)
+        if args.method == 'prk':
+            return sampling.prk_sample(model_fn, x, steps, extra_args)
+        if args.method == 'plms':
+            return sampling.plms_sample(model_fn, x, steps, extra_args)
+        if args.method == 'pie':
+            return sampling.pie_sample(model_fn, x, steps, extra_args)
+        if args.method == 'plms2':
+            return sampling.plms2_sample(model_fn, x, steps, extra_args)
+        assert False
 
     def run_all(n, batch_size):
         x = torch.randn([n, 3, side_y, side_x], device=device)
