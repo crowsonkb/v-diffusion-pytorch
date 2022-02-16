@@ -49,8 +49,9 @@ If they are somewhere else, you need to specify the path to the checkpoint with 
 ```
 usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                      [--checkpoint CHECKPOINT] [--device DEVICE] [--eta ETA] [--init INIT]
-                     [--method {ddpm,ddim,prk,plms}] [--model {cc12m_1_cfg}] [-n N] [--seed SEED]
-                     [--size SIZE SIZE] [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
+                     [--method {ddpm,ddim,prk,plms,pie,plms2}] [--model {cc12m_1_cfg}] [-n N]
+                     [--seed SEED] [--size SIZE SIZE] [--starting-timestep STARTING_TIMESTEP]
+                     [--steps STEPS]
                      [prompts ...]
 ```
 
@@ -68,7 +69,7 @@ usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--init`: specify the init image (optional)
 
-`--method`: specify the sampling method to use (DDPM, DDIM, PRK, or PLMS) (default PLMS)
+`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, or PLMS2) (default PLMS). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow).
 
 `--model`: specify the model to use (default cc12m_1_cfg)
 
@@ -89,7 +90,8 @@ usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                       [--checkpoint CHECKPOINT] [--clip-guidance-scale CLIP_GUIDANCE_SCALE]
                       [--cutn CUTN] [--cut-pow CUT_POW] [--device DEVICE] [--eta ETA]
-                      [--init INIT] [--model {cc12m_1,yfcc_1,yfcc_2}] [-n N] [--seed SEED]
+                      [--init INIT] [--method {ddpm,ddim,prk,plms,pie,plms2}]
+                      [--model {cc12m_1,cc12m_1_cfg,yfcc_1,yfcc_2}] [-n N] [--seed SEED]
                       [--size SIZE SIZE] [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
                       [prompts ...]
 ```
@@ -108,11 +110,13 @@ usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--device`: the PyTorch device name to use (default autodetects)
 
-`--eta`: set to 0 for deterministic (DDIM) sampling, 1 (the default) for stochastic (DDPM) sampling, and in between to interpolate between the two. DDIM is preferred for low numbers of timesteps.
+`--eta`: set to 0 (the default) while using `--method ddim` for deterministic (DDIM) sampling, 1 for stochastic (DDPM) sampling, and in between to interpolate between the two.
 
 `--images`: the image prompts to use (local files or HTTP(S) URLs). Relative weights for image prompts can be specified by putting the weight after a colon, for example: `"image_1.png:0.5"`.
 
 `--init`: specify the init image (optional)
+
+`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, or PLMS2) (default DDPM). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow).
 
 `--model`: specify the model to use (default cc12m_1)
 
