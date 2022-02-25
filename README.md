@@ -44,6 +44,11 @@ If the model checkpoint for cc12m_1_cfg is stored in `checkpoints/`, the followi
 
 If they are somewhere else, you need to specify the path to the checkpoint with `--checkpoint`.
 
+
+### Colab
+
+There is a cc12m_1_cfg Colab (a simplified version of `cfg_sample.py`) [here](https://colab.research.google.com/drive/1TBo4saFn1BCSfgXsmREFrUl3zSQFg6CC), which can be used for free.
+
 ### CFG sampling (best, but only cc12m_1_cfg supports it)
 
 ```
