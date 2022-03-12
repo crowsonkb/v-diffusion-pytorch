@@ -177,6 +177,8 @@ def main():
     torch.manual_seed(args.seed)
 
     def cond_fn(x, t, pred, clip_embed):
+        if min(pred.shape[2:4]) < 256:
+            pred = F.interpolate(pred, scale_factor=2, mode='bilinear', align_corners=False)
         clip_in = normalize(make_cutouts((pred + 1) / 2))
         image_embeds = clip_model.encode_image(clip_in).view([args.cutn, x.shape[0], -1])
         losses = spherical_dist_loss(image_embeds, clip_embed[None])
@@ -212,7 +214,10 @@ def main():
     def run_all(n, batch_size):
         x = torch.randn([n, 3, side_y, side_x], device=device)
         t = torch.linspace(1, 0, args.steps + 1, device=device)[:-1]
-        steps = utils.get_spliced_ddpm_cosine_schedule(t)
+        if model.min_t == 0:
+            steps = utils.get_spliced_ddpm_cosine_schedule(t)
+        else:
+            steps = utils.get_ddpm_schedule(t)
         if args.init:
             steps = steps[steps < args.starting_timestep]
             alpha, sigma = utils.t_to_alpha_sigma(steps[0])

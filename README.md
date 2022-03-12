@@ -32,6 +32,16 @@ A 481M parameter unconditional model trained on a 33 million image original reso
 
 A 968M parameter unconditional model trained on a 33 million image original resolution subset of [Yahoo Flickr Creative Commons 100 Million](http://projects.dfki.uni-kl.de/yfcc100m/).
 
+It also contains PyTorch ports of the four models from [v-diffusion-jax](https://github.com/crowsonkb/v-diffusion-jax), `danbooru_128`, `imagenet_128`, `wikiart_128`, `wikiart_256`:
+
+- [Danbooru SFW 128x128](https://v-diffusion.s3.us-west-2.amazonaws.com/danbooru_128.pth), SHA-256 `1728940d3531504246dbdc75748205fd8a24238a17e90feb82a64d7c8078c449`
+
+- [ImageNet 128x128](https://v-diffusion.s3.us-west-2.amazonaws.com/imagenet_128.pth), SHA-256 `cac117cd0ed80390b2ae7f3d48bf226fd8ee0799d3262c13439517da7c214a67`
+
+- [WikiArt 128x128](https://v-diffusion.s3.us-west-2.amazonaws.com/wikiart_128.pth), SHA-256 `b3ca8d0cf8bd47dcbf92863d0ab6e90e5be3999ab176b294c093431abdce19c1`
+
+- [WikiArt 256x256](https://v-diffusion.s3.us-west-2.amazonaws.com/wikiart_256.pth), SHA-256 `da45c38aa31cd0d2680d29a3aaf2f50537a4146d80bba2ca3e7a18d227d9b627`
+
 ## Sampling
 
 ### Example
@@ -96,8 +106,9 @@ usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                       [--checkpoint CHECKPOINT] [--clip-guidance-scale CLIP_GUIDANCE_SCALE]
                       [--cutn CUTN] [--cut-pow CUT_POW] [--device DEVICE] [--eta ETA]
                       [--init INIT] [--method {ddpm,ddim,prk,plms,pie,plms2}]
-                      [--model {cc12m_1,cc12m_1_cfg,yfcc_1,yfcc_2}] [-n N] [--seed SEED]
-                      [--size SIZE SIZE] [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
+                      [--model {cc12m_1,cc12m_1_cfg,danbooru_128,imagenet_128,wikiart_128,wikiart_256,yfcc_1,yfcc_2}]
+                      [-n N] [--seed SEED] [--size SIZE SIZE]
+                      [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
                       [prompts ...]
 ```
 

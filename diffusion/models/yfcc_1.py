@@ -75,6 +75,9 @@ class YFCC1Model(nn.Module):
     def __init__(self):
         super().__init__()
         self.shape = (3, 512, 512)
+        self.min_t = 0.
+        self.max_t = 1.
+
         c = 128  # The base channel count
 
         # The inputs to timestep_embed will approximately fall into the range

@@ -75,6 +75,9 @@ class YFCC2Model(nn.Module):
     def __init__(self):
         super().__init__()
         self.shape = (3, 512, 512)
+        self.min_t = 0.
+        self.max_t = 1.
+
         c = 256  # The base channel count
         cs = [c // 2, c, c * 2, c * 2, c * 4, c * 4, c * 8, c * 8]
 
