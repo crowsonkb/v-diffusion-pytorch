@@ -16,31 +16,31 @@ Thank you to [stability.ai](https://www.stability.ai) for compute to train these
 
 ## Model checkpoints:
 
-- [CC12M_1 CFG 256x256](https://v-diffusion.s3.us-west-2.amazonaws.com/cc12m_1_cfg.pth), SHA-256 `4fc95ee1b3205a3f7422a07746383776e1dbc367eaf06a5b658ad351e77b7bda`
+- [CC12M_1 CFG 256x256](https://the-eye.eu/public/AI/models/v-diffusion/cc12m_1_cfg.pth), SHA-256 `4fc95ee1b3205a3f7422a07746383776e1dbc367eaf06a5b658ad351e77b7bda`
 
 A 602M parameter CLIP conditioned model trained on [Conceptual 12M](https://github.com/google-research-datasets/conceptual-12m) for 3.1M steps and then fine-tuned for classifier-free guidance for 250K additional steps. **This is the recommended model to use.**
 
-- [CC12M_1 256x256](https://v-diffusion.s3.us-west-2.amazonaws.com/cc12m_1.pth), SHA-256 `63946d1f6a1cb54b823df818c305d90a9c26611e594b5f208795864d5efe0d1f`
+- [CC12M_1 256x256](https://the-eye.eu/public/AI/models/v-diffusion/cc12m_1.pth), SHA-256 `63946d1f6a1cb54b823df818c305d90a9c26611e594b5f208795864d5efe0d1f`
 
 As above, before CFG fine-tuning. The model from the original release of this repo.
 
-- [YFCC_1 512x512](https://v-diffusion.s3.us-west-2.amazonaws.com/yfcc_1.pth), SHA-256 `a1c0f6baaf89cb4c461f691c2505e451ff1f9524744ce15332b7987cc6e3f0c8`
+- [YFCC_1 512x512](https://the-eye.eu/public/AI/models/v-diffusion/yfcc_1.pth), SHA-256 `a1c0f6baaf89cb4c461f691c2505e451ff1f9524744ce15332b7987cc6e3f0c8`
 
 A 481M parameter unconditional model trained on a 33 million image original resolution subset of [Yahoo Flickr Creative Commons 100 Million](http://projects.dfki.uni-kl.de/yfcc100m/).
 
-- [YFCC_2 512x512](https://v-diffusion.s3.us-west-2.amazonaws.com/yfcc_2.pth), SHA-256 `69ad4e534feaaebfd4ccefbf03853d5834231ae1b5402b9d2c3e2b331de27907`
+- [YFCC_2 512x512](https://the-eye.eu/public/AI/models/v-diffusion/yfcc_2.pth), SHA-256 `69ad4e534feaaebfd4ccefbf03853d5834231ae1b5402b9d2c3e2b331de27907`
 
 A 968M parameter unconditional model trained on a 33 million image original resolution subset of [Yahoo Flickr Creative Commons 100 Million](http://projects.dfki.uni-kl.de/yfcc100m/).
 
 It also contains PyTorch ports of the four models from [v-diffusion-jax](https://github.com/crowsonkb/v-diffusion-jax), `danbooru_128`, `imagenet_128`, `wikiart_128`, `wikiart_256`:
 
-- [Danbooru SFW 128x128](https://v-diffusion.s3.us-west-2.amazonaws.com/danbooru_128.pth), SHA-256 `1728940d3531504246dbdc75748205fd8a24238a17e90feb82a64d7c8078c449`
+- [Danbooru SFW 128x128](https://the-eye.eu/public/AI/models/v-diffusion/danbooru_128.pth), SHA-256 `1728940d3531504246dbdc75748205fd8a24238a17e90feb82a64d7c8078c449`
 
-- [ImageNet 128x128](https://v-diffusion.s3.us-west-2.amazonaws.com/imagenet_128.pth), SHA-256 `cac117cd0ed80390b2ae7f3d48bf226fd8ee0799d3262c13439517da7c214a67`
+- [ImageNet 128x128](https://the-eye.eu/public/AI/models/v-diffusion/imagenet_128.pth), SHA-256 `cac117cd0ed80390b2ae7f3d48bf226fd8ee0799d3262c13439517da7c214a67`
 
-- [WikiArt 128x128](https://v-diffusion.s3.us-west-2.amazonaws.com/wikiart_128.pth), SHA-256 `b3ca8d0cf8bd47dcbf92863d0ab6e90e5be3999ab176b294c093431abdce19c1`
+- [WikiArt 128x128](https://the-eye.eu/public/AI/models/v-diffusion/wikiart_128.pth), SHA-256 `b3ca8d0cf8bd47dcbf92863d0ab6e90e5be3999ab176b294c093431abdce19c1`
 
-- [WikiArt 256x256](https://v-diffusion.s3.us-west-2.amazonaws.com/wikiart_256.pth), SHA-256 `da45c38aa31cd0d2680d29a3aaf2f50537a4146d80bba2ca3e7a18d227d9b627`
+- [WikiArt 256x256](https://the-eye.eu/public/AI/models/v-diffusion/wikiart_256.pth), SHA-256 `da45c38aa31cd0d2680d29a3aaf2f50537a4146d80bba2ca3e7a18d227d9b627`
 
 ## Sampling
 
