@@ -49,10 +49,13 @@ def main():
                    help='the checkpoint to use')
     p.add_argument('--device', type=str,
                    help='the device to use')
-    p.add_argument('--eta', type=float, default=1.,
+    p.add_argument('--eta', type=float, default=0.,
                    help='the amount of noise to add during sampling (0-1)')
     p.add_argument('--init', type=str,
                    help='the init image')
+    p.add_argument('--method', type=str, default='plms',
+                   choices=['ddpm', 'ddim', 'prk', 'plms', 'pie', 'plms2'],
+                   help='the sampling method to use')
     p.add_argument('--model', type=str, default='cc12m_1_cfg', choices=['cc12m_1_cfg'],
                    help='the model to use')
     p.add_argument('-n', type=int, default=1,
@@ -63,7 +66,7 @@ def main():
                    help='the output image size')
     p.add_argument('--starting-timestep', '-st', type=float, default=0.9,
                    help='the timestep to start at (used with init images)')
-    p.add_argument('--steps', type=int, default=500,
+    p.add_argument('--steps', type=int, default=50,
                    help='the number of timesteps')
     args = p.parse_args()
 
@@ -128,7 +131,19 @@ def main():
         return v
 
     def run(x, steps):
-        return sampling.sample(cfg_model_fn, x, steps, args.eta, {})
+        if args.method == 'ddpm':
+            return sampling.sample(cfg_model_fn, x, steps, 1., {})
+        if args.method == 'ddim':
+            return sampling.sample(cfg_model_fn, x, steps, args.eta, {})
+        if args.method == 'prk':
+            return sampling.prk_sample(cfg_model_fn, x, steps, {})
+        if args.method == 'plms':
+            return sampling.plms_sample(cfg_model_fn, x, steps, {})
+        if args.method == 'pie':
+            return sampling.pie_sample(cfg_model_fn, x, steps, {})
+        if args.method == 'plms2':
+            return sampling.plms2_sample(cfg_model_fn, x, steps, {})
+        assert False
 
     def run_all(n, batch_size):
         x = torch.randn([n, 3, side_y, side_x], device=device)
