@@ -141,7 +141,7 @@ def make_eps_model_fn(model):
     def eps_model_fn(x, t, **extra_args):
         alphas, sigmas = utils.t_to_alpha_sigma(t)
         v = model(x, t, **extra_args)
-        eps = x * sigmas[:, None, None, None] + v * alphas[:, None, None, None]
+        eps = x * utils.append_dims(sigmas, x.ndim) + v * utils.append_dims(alphas, x.ndim)
         return eps
     return eps_model_fn
 
@@ -156,8 +156,8 @@ def make_autocast_model_fn(model, enabled=True):
 def transfer(x, eps, t_1, t_2):
     alphas, sigmas = utils.t_to_alpha_sigma(t_1)
     next_alphas, next_sigmas = utils.t_to_alpha_sigma(t_2)
-    pred = (x - eps * sigmas[:, None, None, None]) / alphas[:, None, None, None]
-    x = pred * next_alphas[:, None, None, None] + eps * next_sigmas[:, None, None, None]
+    pred = (x - eps * utils.append_dims(sigmas, x.ndim)) / utils.append_dims(alphas, x.ndim)
+    x = pred * utils.append_dims(next_alphas, x.ndim) + eps * utils.append_dims(next_sigmas, x.ndim)
     return x, pred
 
 
