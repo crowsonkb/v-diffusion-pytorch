@@ -64,9 +64,9 @@ There is a cc12m_1_cfg Colab (a simplified version of `cfg_sample.py`) [here](ht
 ```
 usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                      [--checkpoint CHECKPOINT] [--device DEVICE] [--eta ETA] [--init INIT]
-                     [--method {ddpm,ddim,prk,plms,pie,plms2}] [--model {cc12m_1_cfg}] [-n N]
-                     [--seed SEED] [--size SIZE SIZE] [--starting-timestep STARTING_TIMESTEP]
-                     [--steps STEPS]
+                     [--method {ddpm,ddim,prk,plms,pie,plms2,iplms}] [--model {cc12m_1_cfg}]
+                     [-n N] [--seed SEED] [--size SIZE SIZE]
+                     [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
                      [prompts ...]
 ```
 
@@ -84,7 +84,7 @@ usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--init`: specify the init image (optional)
 
-`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, or PLMS2) (default PLMS). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow).
+`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, PLMS2, or IPLMS) (default PLMS). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow). IPLMS is the fourth order "Improved PLMS" sampler from (Fast Sampling of Diffusion Models with Exponential Integrator)[https://arxiv.org/abs/2204.13902].
 
 `--model`: specify the model to use (default cc12m_1_cfg)
 
@@ -105,7 +105,7 @@ usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                       [--checkpoint CHECKPOINT] [--clip-guidance-scale CLIP_GUIDANCE_SCALE]
                       [--cutn CUTN] [--cut-pow CUT_POW] [--device DEVICE] [--eta ETA]
-                      [--init INIT] [--method {ddpm,ddim,prk,plms,pie,plms2}]
+                      [--init INIT] [--method {ddpm,ddim,prk,plms,pie,plms2,iplms}]
                       [--model {cc12m_1,cc12m_1_cfg,danbooru_128,imagenet_128,wikiart_128,wikiart_256,yfcc_1,yfcc_2}]
                       [-n N] [--seed SEED] [--size SIZE SIZE]
                       [--starting-timestep STARTING_TIMESTEP] [--steps STEPS]
@@ -132,7 +132,7 @@ usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--init`: specify the init image (optional)
 
-`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, or PLMS2) (default DDPM). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow).
+`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, PLMS2, or IPLMS) (default PLMS). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow). IPLMS is the fourth order "Improved PLMS" sampler from (Fast Sampling of Diffusion Models with Exponential Integrator)[https://arxiv.org/abs/2204.13902].
 
 `--model`: specify the model to use (default cc12m_1)
 
