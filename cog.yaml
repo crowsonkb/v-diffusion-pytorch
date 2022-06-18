@@ -1,0 +1,24 @@
+# Configuration for Cog ⚙️
+# Reference: https://github.com/replicate/cog/blob/main/docs/yaml.md
+
+build:
+  # set to true if your model requires a GPU
+  gpu: true
+
+  # python version in the form '3.8' or '3.8.12'
+  python_version: "3.8"
+
+  # a list of packages in the format <package-name>==<version>
+  python_packages:
+    - "torch==1.9.0"
+    - "torchvision==0.9.0"
+    - "ftfy==6.0.3"
+    - "tqdm==4.62.3"
+    - "pillow==9.0.1"
+  # commands run after the environment is setup
+  run:
+    # Most recent commit to master as 2022-02-07, just wanted to pin it to single one
+    - "pip install git+https://github.com/openai/CLIP.git@40f5484c1c74edd83cb9cf687c6ab92b28d8b656"
+
+# predict.py defines how predictions are run on your model
+predict: "cfg_predict.py:ClassifierFreeGuidanceDiffusionPredictor"
