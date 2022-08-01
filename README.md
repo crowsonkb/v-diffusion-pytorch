@@ -6,6 +6,8 @@ The models are denoising diffusion probabilistic models (https://arxiv.org/abs/2
 
 Thank you to [stability.ai](https://www.stability.ai) for compute to train these models!
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1knOxT1ezh87mFGvbNC3zB3p8Ixix8ikq?usp=sharing)
+
 ## Dependencies
 
 - PyTorch ([installation instructions](https://pytorch.org/get-started/locally/))
