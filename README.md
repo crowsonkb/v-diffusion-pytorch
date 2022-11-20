@@ -6,13 +6,11 @@ The models are denoising diffusion probabilistic models (https://arxiv.org/abs/2
 
 Thank you to [stability.ai](https://www.stability.ai) for compute to train these models!
 
-## Dependencies
+## Installation
 
-- PyTorch ([installation instructions](https://pytorch.org/get-started/locally/))
+`pip install v-diffusion-pytorch`
 
-- requests, tqdm (install with `pip install`)
-
-- CLIP (https://github.com/openai/CLIP), and its additional pip-installable dependencies: ftfy, regex. **If you `git clone --recursive` this repo, it should fetch CLIP automatically.**
+or git clone then `pip install -e .`
 
 ## Model checkpoints:
 
