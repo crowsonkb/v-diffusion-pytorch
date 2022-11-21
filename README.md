@@ -59,6 +59,8 @@ There is a cc12m_1_cfg Colab (a simplified version of `cfg_sample.py`) [here](ht
 
 ### CFG sampling (best, but only cc12m_1_cfg supports it)
 
+[Demo and Docker image on Replicate](https://replicate.ai/crowsonkb/clip-guided-diffusion-cfg)
+
 ```
 usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
                      [--checkpoint CHECKPOINT] [--device DEVICE] [--eta ETA] [--init INIT]
