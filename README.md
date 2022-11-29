@@ -82,7 +82,7 @@ usage: cfg_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--init`: specify the init image (optional)
 
-`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, PLMS2, or IPLMS) (default PLMS). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow). IPLMS is the fourth order "Improved PLMS" sampler from (Fast Sampling of Diffusion Models with Exponential Integrator)[https://arxiv.org/abs/2204.13902].
+`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, PLMS2, or IPLMS) (default PLMS). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow). IPLMS is the fourth order "Improved PLMS" sampler from [Fast Sampling of Diffusion Models with Exponential Integrator](https://arxiv.org/abs/2204.13902).
 
 `--model`: specify the model to use (default cc12m_1_cfg)
 
@@ -130,7 +130,7 @@ usage: clip_sample.py [-h] [--images [IMAGE ...]] [--batch-size BATCH_SIZE]
 
 `--init`: specify the init image (optional)
 
-`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, PLMS2, or IPLMS) (default PLMS). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow). IPLMS is the fourth order "Improved PLMS" sampler from (Fast Sampling of Diffusion Models with Exponential Integrator)[https://arxiv.org/abs/2204.13902].
+`--method`: specify the sampling method to use (DDPM, DDIM, PRK, PLMS, PIE, PLMS2, or IPLMS) (default PLMS). DDPM is the original SDE sampling method, DDIM integrates the probability flow ODE using a first order method, PLMS is fourth-order pseudo Adams-Bashforth, and PLMS2 is second-order pseudo Adams-Bashforth. PRK (fourth-order Pseudo Runge-Kutta) and PIE (second-order Pseudo Improved Euler) are used to bootstrap PLMS and PLMS2 but can be used on their own if you desire (slow). IPLMS is the fourth order "Improved PLMS" sampler from [Fast Sampling of Diffusion Models with Exponential Integrator](https://arxiv.org/abs/2204.13902).
 
 `--model`: specify the model to use (default cc12m_1)
 
